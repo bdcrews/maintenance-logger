@@ -1,3 +1,5 @@
+"use strict";
+
 const UPDATE_FORM_IDENTIFIER = '#updateForm';
 const DELETE_CONFIRMATION_IDENTIFIER = '.deleteConfirmation';
 const RESULTS_FROM_REQUEST_IDENTIFIER = '.resultsFromRequest';
@@ -50,8 +52,13 @@ function getMaintenanceRecords(callbackFn) {
 
 function deleteMaintenanceRecord(id, callbackFn) {
     // we use a `setTimeout` to make this asynchronous
-    // as it would be with a real AJAX call.  
-MOCK_MAINTENANCE_RECORD.maintenanceRecords.filter((element)=>{return(element.id == id);});  
+    // as it would be with a real AJAX call.   
+    setTimeout(function(){ callbackFn(MOCK_MAINTENANCE_RECORD);}, 1);  
+}
+
+function UpdateMaintenanceRecord(record, callbackFn) {
+    // we use a `setTimeout` to make this asynchronous
+    // as it would be with a real AJAX call. 
     setTimeout(function(){ callbackFn(MOCK_MAINTENANCE_RECORD);}, 1);  
 }
 
@@ -66,7 +73,7 @@ function getSingleMaintenanceRecords(id, callbackFn) {
 function displayMaintenanceRecords(data) {
     resetScreens();
     $('#filterPart').show();
-    for (index in data.maintenanceRecords) {
+    for (var index in data.maintenanceRecords) {
 	   $('#listTable').append(
         '<tr>' +
         '<td>' + data.maintenanceRecords[index].part + '</td>' +
@@ -108,14 +115,22 @@ function displayDeleteRecord(data) {
         '<p>Repair: ' + data.needsRepair + '</p>' +
         '<p>Last Maintenance: ' + data.lastMaintenance + '</p>' +
         '<p>Freq: ' + data.frequency + '</p>' +
-        '<br><br><input class="js-delete-record-btn id="' + data.id + '" type="button" value="Delete">'
+        '<br><br><input class="js-delete-record-btn" id=' + data.id + '" type="button" value="Delete">'
     );
 }
 
 function displayDeleteResults(data) {
     resetScreens();
-    $(RESULTS_FROM_REQUEST_IDENTIFIER).append(
+    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
         '<p>Delete: DELETE SUCCESSFULL ---MAYBE</p>' +
+        '<br><br><input class="js-show-maintenance-record-btn" type="button" value="Show Maintenance Recordes">'
+    );
+}
+
+function displayUpdateResults(data) {
+    resetScreens();
+    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
+        '<p>Delete: Update SUCCESSFULL ---MAYBE</p>' +
         '<br><br><input class="js-show-maintenance-record-btn" type="button" value="Show Maintenance Recordes">'
     );
 }
@@ -129,11 +144,17 @@ function viewDeleteRecord(id) {
 }
 
 function getAndDisplayMaintenanceRecords() {
+    console.log("Hello Brandon");
 	getMaintenanceRecords(displayMaintenanceRecords);
 }
 
 function deleteRecord(id) {
     deleteMaintenanceRecord(id, displayDeleteResults);
+}
+
+function updateRecord(record) {
+    console.log(record);
+    UpdateMaintenanceRecord(record, displayUpdateResults);
 }
 
 function filterByPart() {
@@ -168,7 +189,7 @@ function watchSubmitBtn() {
   $(UPDATE_FORM_IDENTIFIER).submit(function(event) {
     event.preventDefault();
     // get data from api
-    console.log($(event.currentTarget));
+    updateRecord($(UPDATE_FORM_IDENTIFIER).serialize());
   });
 }
 
