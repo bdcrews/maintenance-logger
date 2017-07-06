@@ -44,10 +44,12 @@ var MOCK_MAINTENANCE_RECORD = {
     ]
 };
 
+// BDC_Note: Need to dynamicly get this from the config file, but how on client side?
+var serverBase = '//localhost:8080/';
+var MAINTENANCE_LOGGER_URL = serverBase + 'records';
+
 function getMaintenanceRecords(callbackFn) {
-    // we use a `setTimeout` to make this asynchronous
-    // as it would be with a real AJAX call.
-	setTimeout(function(){ callbackFn(MOCK_MAINTENANCE_RECORD);}, 1);
+    $.getJSON(MAINTENANCE_LOGGER_URL, callbackFn);
 }
 
 function deleteMaintenanceRecord(id, callbackFn) {
@@ -71,19 +73,20 @@ function getSingleMaintenanceRecords(id, callbackFn) {
 // this function stays the same when we connect
 // to real API later
 function displayMaintenanceRecords(data) {
+    console.log(data);
     resetScreens();
     $('#filterPart').show();
-    for (var index in data.maintenanceRecords) {
+    for (var index in data) {
 	   $('#listTable').append(
         '<tr>' +
-        '<td>' + data.maintenanceRecords[index].part + '</td>' +
-        '<td>' + data.maintenanceRecords[index].status + '</td>' +
-        '<td>' + data.maintenanceRecords[index].needsRepair + '</td>' +
-        '<td>' + data.maintenanceRecords[index].lastMaintenance + '</td>' +
-        '<td>' + data.maintenanceRecords[index].frequency + '</td>' +
+        '<td>' + data[index].part + '</td>' +
+        '<td>' + data[index].status + '</td>' +
+        '<td>' + data[index].needsRepair + '</td>' +
+        '<td>' + data[index].lastMaintenance + '</td>' +
+        '<td>' + data[index].frequency + '</td>' +
         '<td>' + 
-            '<button type="button" onclick="viewUpdateRecord(' + data.maintenanceRecords[index].id  + ')">Update</button>' + 
-            '<button type="button" onclick="viewDeleteRecord(' + data.maintenanceRecords[index].id  + ')">Delete</button>' + 
+            '<button type="button" onclick="viewUpdateRecord(' + data[index].id  + ')">Update</button>' + 
+            '<button type="button" onclick="viewDeleteRecord(' + data[index].id  + ')">Delete</button>' + 
         '</td>' +
         '</tr>');
     }

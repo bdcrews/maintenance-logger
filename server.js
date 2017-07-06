@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 
 const {DATABASE_URL, PORT} = require('./config');
-//const {BlogPost} = require('./models');
+const {MaintenanceLog} = require('./models');
 
 const app = express();
 
@@ -13,33 +13,35 @@ app.use(bodyParser.json());
 
 mongoose.Promise = global.Promise;
 
-/*
-app.get('/posts', (req, res) => {
-  BlogPost
+app.get('/records', (req, res) => {
+  MaintenanceLog
     .find()
     .exec()
-    .then(posts => {
-      res.json(posts.map(post => post.apiRepr()));
+    .then(records => {
+      res.json(records.map(record => record.apiRepr()));
     })
     .catch(err => {
       console.error(err);
       res.status(500).json({error: 'something went terribly wrong'});
     });
 });
+/*
 
-app.get('/posts/:id', (req, res) => {
-  BlogPost
+app.get('/records/:id', (req, res) => {
+  MaintenanceLog
     .findById(req.params.id)
     .exec()
-    .then(post => res.json(post.apiRepr()))
+    .then(record => res.json(record.apiRepr()))
     .catch(err => {
       console.error(err);
       res.status(500).json({error: 'something went horribly awry'});
     });
 });
 
-app.post('/posts', (req, res) => {
-  const requiredFields = ['title', 'content', 'author'];
+*/
+
+app.post('/records', (req, res) => {
+  const requiredFields = ['part', 'status', 'needsRepair', 'lastMaintenance', 'frequency'];
   for (let i=0; i<requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
@@ -49,23 +51,27 @@ app.post('/posts', (req, res) => {
     }
   }
 
-  BlogPost
+  MaintenanceLog
     .create({
-      title: req.body.title,
-      content: req.body.content,
-      author: req.body.author
+      part: req.body.part,
+      status: req.body.status,
+      needsRepair: req.body.needsRepair,
+      //lastMaintenance: req.body.lastMaintenance,
+      frequency: req.body.frequency
     })
-    .then(blogPost => res.status(201).json(blogPost.apiRepr()))
+    .then(maintenanceLog => {
+      res.status(201).json(maintenanceLog.apiRepr());
+      console.log(maintenanceLog.apiRepr());
+  })
     .catch(err => {
         console.error(err);
         res.status(500).json({error: 'Something went wrong'});
     });
-
 });
 
 
-app.delete('/posts/:id', (req, res) => {
-  BlogPost
+app.delete('/records/:id', (req, res) => {
+  MaintenanceLog
     .findByIdAndRemove(req.params.id)
     .exec()
     .then(() => {
@@ -78,7 +84,9 @@ app.delete('/posts/:id', (req, res) => {
 });
 
 
-app.put('/posts/:id', (req, res) => {
+/*
+
+app.put('/records/:id', (req, res) => {
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     res.status(400).json({
       error: 'Request path id and request body id values must match'
@@ -93,7 +101,7 @@ app.put('/posts/:id', (req, res) => {
     }
   });
 
-  BlogPost
+  MaintenanceLog
     .findByIdAndUpdate(req.params.id, {$set: updated}, {new: true})
     .exec()
     .then(updatedPost => res.status(201).json(updatedPost.apiRepr()))
@@ -102,11 +110,11 @@ app.put('/posts/:id', (req, res) => {
 
 
 app.delete('/:id', (req, res) => {
-  BlogPosts
+  MaintenanceLogs
     .findByIdAndRemove(req.params.id)
     .exec()
     .then(() => {
-      console.log(`Deleted blog post with id \`${req.params.ID}\``);
+      console.log(`Deleted blog record with id \`${req.params.ID}\``);
       res.status(204).end();
     });
 });
