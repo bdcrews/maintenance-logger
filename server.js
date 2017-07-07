@@ -2,6 +2,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
+const jsonParser = bodyParser.json();
 
 const {DATABASE_URL, PORT} = require('./config');
 const {MaintenanceLog} = require('./models');
@@ -13,59 +14,58 @@ app.use(bodyParser.json());
 
 mongoose.Promise = global.Promise;
 
+
+
+const requiredFields = (fields) => {
+  console.log(fields);
+  return (req, res, next) => {
+    if (fields.every((field) => field in req.body)) {
+      next();
+    } 
+    else {
+      const missing = fields
+        .filter((field) => !(req in body))
+        .map((field) => '`' + field + '`')
+        .join(', ');
+      next({
+        message: `Missing ${missing} in request body`,
+        status: 400
+      });
+    }
+  }
+}
+
+
 app.get('/records', (req, res) => {
   MaintenanceLog
     .find()
     .exec()
     .then(records => {
       res.json(records.map(record => record.apiRepr()));
-    })
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({error: 'something went terribly wrong'});
     });
 });
-/*
 
 app.get('/records/:id', (req, res) => {
   MaintenanceLog
     .findById(req.params.id)
     .exec()
-    .then(record => res.json(record.apiRepr()))
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({error: 'something went horribly awry'});
-    });
+    .then(record => res.json(record.apiRepr()));
 });
 
-*/
-
-app.post('/records', (req, res) => {
-  const requiredFields = ['part', 'status', 'needsRepair', 'lastMaintenance', 'frequency'];
-  for (let i=0; i<requiredFields.length; i++) {
-    const field = requiredFields[i];
-    if (!(field in req.body)) {
-      const message = `Missing \`${field}\` in request body`
-      console.error(message);
-      return res.status(400).send(message);
-    }
-  }
-
-  MaintenanceLog
-    .create({
+app.post('/records',
+  jsonParser,  
+  requiredFields(['part', 'status', 'lastMaintenance', 'frequency']),
+  (req, res) => {
+    MaintenanceLog.create({
       part: req.body.part,
       status: req.body.status,
       needsRepair: req.body.needsRepair,
-      //lastMaintenance: req.body.lastMaintenance,
+      lastMaintenance: req.body.lastMaintenance,
       frequency: req.body.frequency
     })
     .then(maintenanceLog => {
       res.status(201).json(maintenanceLog.apiRepr());
       console.log(maintenanceLog.apiRepr());
-  })
-    .catch(err => {
-        console.error(err);
-        res.status(500).json({error: 'Something went wrong'});
     });
 });
 
@@ -76,10 +76,6 @@ app.delete('/records/:id', (req, res) => {
     .exec()
     .then(() => {
       res.status(204).json({message: 'success'});
-    })
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({error: 'something went terribly wrong'});
     });
 });
 
@@ -104,8 +100,7 @@ app.put('/records/:id', (req, res) => {
   MaintenanceLog
     .findByIdAndUpdate(req.params.id, {$set: updated}, {new: true})
     .exec()
-    .then(updatedPost => res.status(201).json(updatedPost.apiRepr()))
-    .catch(err => res.status(500).json({message: 'Something went wrong'}));
+    .then(updatedPost => res.status(201).json(updatedPost.apiRepr()));
 });
 
 
@@ -122,8 +117,18 @@ app.delete('/:id', (req, res) => {
 
 app.use(express.static('public'));
 
-app.use('*', function(req, res) {
-  res.status(404).json({message: 'Not Found'});
+app.use('*', function(req, res, next) {
+  return(
+      next({
+        message: `Not Found`,
+        status: 400
+      })
+    );
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.message);
+  res.status(err.status||500).send(err.message);
 });
 
 // closeServer needs access to a server object, but that only
