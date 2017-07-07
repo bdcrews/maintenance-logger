@@ -14,10 +14,7 @@ app.use(bodyParser.json());
 
 mongoose.Promise = global.Promise;
 
-
-
 const requiredFields = (fields) => {
-  console.log(fields);
   return (req, res, next) => {
     if (fields.every((field) => field in req.body)) {
       next();
@@ -65,7 +62,6 @@ app.post('/records',
     })
     .then(maintenanceLog => {
       res.status(201).json(maintenanceLog.apiRepr());
-      console.log(maintenanceLog.apiRepr());
     });
 });
 
@@ -76,11 +72,12 @@ app.delete('/records/:id', (req, res) => {
     .exec()
     .then(() => {
       res.status(204).json({message: 'success'});
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({error: 'something went terribly wrong'});
     });
 });
-
-
-/*
 
 app.put('/records/:id', (req, res) => {
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
@@ -90,7 +87,7 @@ app.put('/records/:id', (req, res) => {
   }
 
   const updated = {};
-  const updateableFields = ['title', 'content', 'author'];
+  const updateableFields = ['part', 'status', 'needsRepair', 'lastMaintenance', 'frequency'];
   updateableFields.forEach(field => {
     if (field in req.body) {
       updated[field] = req.body[field];
@@ -103,17 +100,14 @@ app.put('/records/:id', (req, res) => {
     .then(updatedPost => res.status(201).json(updatedPost.apiRepr()));
 });
 
-
 app.delete('/:id', (req, res) => {
   MaintenanceLogs
     .findByIdAndRemove(req.params.id)
     .exec()
     .then(() => {
-      console.log(`Deleted blog record with id \`${req.params.ID}\``);
       res.status(204).end();
     });
 });
-*/
 
 app.use(express.static('public'));
 
