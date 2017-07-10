@@ -19,6 +19,6 @@ maintenanceRecordSchema.methods.apiRepr = function() {
   };
 }
 
-const MaintenanceLog = mongoose.model('MaintenanceLog', maintenanceRecordSchema);
+const MaintenanceRecord = mongoose.model('MaintenanceRecord', maintenanceRecordSchema);
 
-module.exports = {MaintenanceLog};
+module.exports = {MaintenanceRecord};

@@ -1,3 +1,5 @@
+'use strict';
+
 const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -5,7 +7,7 @@ const morgan = require('morgan');
 const jsonParser = bodyParser.json();
 
 const {DATABASE_URL, PORT} = require('./config');
-const {MaintenanceLog} = require('./models');
+const {MaintenanceRecord} = require('./models');
 
 const app = express();
 
@@ -34,7 +36,7 @@ const requiredFields = (fields) => {
 
 
 app.get('/records', (req, res) => {
-  MaintenanceLog
+  MaintenanceRecord
     .find()
     .exec()
     .then(records => {
@@ -43,7 +45,7 @@ app.get('/records', (req, res) => {
 });
 
 app.get('/records/:id', (req, res) => {
-  MaintenanceLog
+  MaintenanceRecord
     .findById(req.params.id)
     .exec()
     .then(record => res.json(record.apiRepr()));
@@ -53,21 +55,20 @@ app.post('/records',
   jsonParser,  
   requiredFields(['part', 'status', 'lastMaintenance', 'frequency']),
   (req, res) => {
-    MaintenanceLog.create({
+    MaintenanceRecord.create({
       part: req.body.part,
       status: req.body.status,
       needsRepair: req.body.needsRepair,
       lastMaintenance: req.body.lastMaintenance,
       frequency: req.body.frequency
     })
-    .then(maintenanceLog => {
-      res.status(201).json(maintenanceLog.apiRepr());
+    .then(maintenanceRecord => {
+      res.status(201).json(maintenanceRecord.apiRepr());
     });
 });
 
-
 app.delete('/records/:id', (req, res) => {
-  MaintenanceLog
+  MaintenanceRecord
     .findByIdAndRemove(req.params.id)
     .exec()
     .then(() => {
@@ -94,14 +95,14 @@ app.put('/records/:id', (req, res) => {
     }
   });
 
-  MaintenanceLog
+  MaintenanceRecord
     .findByIdAndUpdate(req.params.id, {$set: updated}, {new: true})
     .exec()
     .then(updatedPost => res.status(201).json(updatedPost.apiRepr()));
 });
 
 app.delete('/:id', (req, res) => {
-  MaintenanceLogs
+  MaintenanceRecords
     .findByIdAndRemove(req.params.id)
     .exec()
     .then(() => {

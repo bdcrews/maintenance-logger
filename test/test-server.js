@@ -1,3 +1,5 @@
+'use strict';
+
 const chai = require('chai');
 const faker = require('faker');
 const chaiHttp = require('chai-http');
@@ -5,7 +7,7 @@ const mongoose = require('mongoose');
 
 const should = chai.should();
 
-const {MaintenanceLog} = require('../models');
+const {MaintenanceRecord} = require('../models');
 const {app, runServer, closeServer} = require('../server');
 const {TEST_DATABASE_URL} = require('../config');
 
@@ -31,7 +33,7 @@ function tearDownDb() {
 // generate placeholder values for part, status,
 // needsRepair, lastMaintenance, and frequency
 // and then we insert that data into mongo
-function seedMaintenanceLogData() {
+function seedMaintenanceRecordData() {
   console.info('seeding maintenance data');
   const seedData = [];
   for (let i=1; i<=10; i++) {
@@ -44,7 +46,7 @@ function seedMaintenanceLogData() {
     });
   }
   // this will return a promise
-  return MaintenanceLog.insertMany(seedData);
+  return MaintenanceRecord.insertMany(seedData);
 }
 
 
@@ -69,7 +71,7 @@ describe('maintenance log API resource', function() {
   });
 
   beforeEach(function() {
-    return seedMaintenanceLogData();
+    return seedMaintenanceRecordData();
   });
 
   afterEach(function() {
@@ -99,7 +101,7 @@ describe('maintenance log API resource', function() {
           // otherwise our db seeding didn't work
           res.body.should.have.length.of.at.least(1);
 
-          return MaintenanceLog.count();
+          return MaintenanceRecord.count();
         })
         .then(count => {
           // the number of returned records should be same
@@ -128,7 +130,7 @@ describe('maintenance log API resource', function() {
           // just check one of the records that its values match with those in db
           // and we'll assume it's true for rest
           resRecord = res.body[0];
-          return MaintenanceLog.findById(resRecord.id).exec();
+          return MaintenanceRecord.findById(resRecord.id).exec();
         })
         .then(record => {
           resRecord.part.should.equal(record.part);
@@ -136,6 +138,128 @@ describe('maintenance log API resource', function() {
           resRecord.needsRepair.should.equal(record.needsRepair);
           //resRecord.lastMaintenance.should.equal(record.lastMaintenance); //BDC_Need correct time format
           resRecord.frequency.should.equal(record.frequency);
+        });
+    });
+  });
+
+  describe('POST endpoint', function() {
+    // strategy: make a POST request with data,
+    // then prove that the record we get back has
+    // right keys, and that `id` is there (which means
+    // the data was inserted into db)
+    it('should add a new maintenance record', function() {
+
+      const newRecord = {
+    	part: faker.random.word(),
+    	status: faker.hacker.adjective(),
+    	needsRepair: "on",
+    	lastMaintenance: faker.date.past(),
+    	frequency: faker.random.number()
+      };
+
+      return chai.request(app)
+        .post('/records')
+        .send(newRecord)
+        .then(function(res) {
+          res.should.have.status(201);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          res.body.should.include.keys('part', 'status', 'needsRepair', 'lastMaintenance', 'frequency');
+          res.body.part.should.equal(newRecord.part);
+          // cause Mongo should have created id on insertion
+          res.body.id.should.not.be.null;
+          res.body.part.should.equal(newRecord.part);
+          res.body.status.should.equal(newRecord.status);
+          res.body.needsRepair.should.equal(newRecord.needsRepair);
+          //res.body.lastMaintenance.should.equal(newRecord.lastMaintenance); //BDC_Need correct time format
+          res.body.frequency.should.equal(newRecord.frequency);
+          return MaintenanceRecord.findById(res.body.id).exec();
+        })
+        .then(function(record) {
+          record.part.should.equal(newRecord.part);
+          record.status.should.equal(newRecord.status);
+          record.needsRepair.should.equal(newRecord.needsRepair);
+          //record.lastMaintenance.should.equal(newRecord.lastMaintenance); //BDC_Need correct time format
+          record.frequency.should.equal(newRecord.frequency);
+        });
+    });
+  });
+
+  describe('PUT endpoint', function() {
+
+    // strategy:
+    //  1. Get an existing record from db
+    //  2. Make a PUT request to update that record
+    //  3. Prove record returned by request contains data we sent
+    //  4. Prove record in db is correctly updated
+    it('should update fields you send over', function() {
+      const updateData = {
+      	part:  'testPart',
+      	status: 'testStatus',
+      	needsRepair: 'on',
+      	lastMaintenance: '2017-09-01T00:00:00.000Z',
+      	frequency: 99
+      };
+
+      return MaintenanceRecord
+        .findOne()
+        .exec()
+        .then(record => {
+          updateData.id = record.id;
+
+          return chai.request(app)
+            .put(`/records/${record.id}`)
+            .send(updateData);
+        })
+        .then(res => {
+          res.should.have.status(201);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          res.body.part.should.equal(updateData.part);
+          res.body.status.should.equal(updateData.status);
+          res.body.needsRepair.should.equal(updateData.needsRepair);
+          //res.body.lastMaintenance.should.equal(updateData.lastMaintenance);
+          res.body.frequency.should.equal(updateData.frequency);
+
+          return MaintenanceRecord.findById(res.body.id).exec();
+        })
+        .then(record => {
+          record.part.should.equal(updateData.part);
+          record.status.should.equal(updateData.status);
+          record.needsRepair.should.equal(updateData.needsRepair);
+          //record.lastMaintenance.should.equal(updateData.lastMaintenance);
+          record.frequency.should.equal(updateData.frequency);
+        });
+    });
+  });
+
+  describe('DELETE endpoint', function() {
+    // strategy:
+    //  1. get a record
+    //  2. make a DELETE request for that record's id
+    //  3. assert that response has right status code
+    //  4. prove that record with the id doesn't exist in db anymore
+    it('should delete a record by id', function() {
+
+      let record;
+
+      return MaintenanceRecord
+        .findOne()
+        .exec()
+        .then(_record => {
+          record = _record;
+          return chai.request(app).delete(`/records/${record.id}`);
+        })
+        .then(res => {
+          res.should.have.status(204);
+          return MaintenanceRecord.findById(record.id);
+        })
+        .then(_record => {
+          // when a variable's value is null, chaining `should`
+          // doesn't work. so `_record.should.be.null` would raise
+          // an error. `should.be.null(_record)` is how we can
+          // make assertions about a null value.
+          should.not.exist(_record);
         });
     });
   });

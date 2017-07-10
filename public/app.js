@@ -211,7 +211,6 @@ function resetScreens() {
 function watchAddBtn() {
   $(ADD_FORM_IDENTIFIER).submit(function(event) {
     event.preventDefault();
-    // get data from api
     var data = $(ADD_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
     addRecord(data);
   });
@@ -220,7 +219,6 @@ function watchAddBtn() {
 function watchUpdateBtn() {
   $(UPDATE_FORM_IDENTIFIER).submit(function(event) {
     event.preventDefault();
-    // get data from api
     var data = $(UPDATE_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
     updateRecord(data);
   });
@@ -229,7 +227,6 @@ function watchUpdateBtn() {
 function watchDeleteBtn() {
   $(DELETE_CONFIRMATION_IDENTIFIER).on('click', '.js-delete-record-btn', function(event) {
     event.preventDefault();
-    // get data from api
     deleteRecord(event.currentTarget.id);
   });
 }
@@ -237,7 +234,6 @@ function watchDeleteBtn() {
 function watchShowMaintenanceBtn() {
   $(RESULTS_FROM_REQUEST_IDENTIFIER).on('click', '.js-show-maintenance-record-btn', function(event) {
     event.preventDefault();
-    // get data from api
     getAndDisplayMaintenanceRecords();
   });
 }
@@ -245,7 +241,6 @@ function watchShowMaintenanceBtn() {
 function watchAddMaintenanceBtn() {
   $(ADD_BUTTON_IDENTIFIER).click((event) => {
     event.preventDefault();
-    // get data from api
     displayAddRecord();
   });
 }
