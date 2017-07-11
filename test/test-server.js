@@ -40,8 +40,8 @@ function seedMaintenanceRecordData() {
     seedData.push({
     	part: faker.random.word(),
     	status: faker.hacker.adjective(),
-    	needsRepair: "on",
-    	lastMaintenance: faker.date.past(),
+    	needsRepair: ((Math.random() < 0.5) ? true : false),
+    	lastMaintenance: faker.date.past(10),
     	frequency: faker.random.number()
     });
   }
@@ -153,7 +153,7 @@ describe('maintenance log API resource', function() {
     	part: faker.random.word(),
     	status: faker.hacker.adjective(),
     	needsRepair: "on",
-    	lastMaintenance: faker.date.past(),
+    	lastMaintenance: faker.date.past(10),
     	frequency: faker.random.number()
       };
 

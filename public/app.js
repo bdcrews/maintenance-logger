@@ -56,13 +56,24 @@ function displayMaintenanceRecords(data) {
     resetScreens();
     $('#filterPart').show();
 
+    $('#listTable').append(`
+        <tr class="header">
+            <th style="width:20%;">Part Name</th>
+            <th style="width:20%;">Status</th>
+            <th style="width:20%;">Repair</th>
+            <th style="width:20%;">Last Maintenance</th>
+            <th style="width:10%;">Freq.</th>
+            <th style="width:10%;"></th>
+        </tr>
+        `);
+
     $('#listTable').append(
         data.map((record) => { return(`
             <tr>
             <td> ${record.part} </td>
             <td> ${record.status} </td>
             <td> ${record.needsRepair} </td>
-            <td> ${record.lastMaintenance} </td>
+            <td> ${new Date(record.lastMaintenance)} </td>
             <td> ${record.frequency} </td>
             <td> 
                 <button type="button" onclick=viewUpdateRecord("${record.id}")>Update</button> 
@@ -72,7 +83,7 @@ function displayMaintenanceRecords(data) {
         `)})
     );
 
-    $(LIST_RECORDS_BUTTON_IDENTIFIER).hide();
+    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", true);
 }
 
 Date.prototype.toDateInputValue = (function() {
@@ -83,6 +94,7 @@ Date.prototype.toDateInputValue = (function() {
 
 function displayAddRecord(data) {
     resetScreens();
+    $(ADD_BUTTON_IDENTIFIER).prop("disabled", true);
     $(ADD_FORM_IDENTIFIER).append(`
         Part Name: <br> 
         <input type="text" name="part" placeholder="part name" required> <br>
@@ -120,7 +132,6 @@ function displayUpdateRecord(data) {
         <br><br>
         <input type="submit" value="Update">
     `);
-console.log(data.needsRepair);
     let needRepairFlag = (data.needsRepair == 'true');
     $('input[name="needsRepair"][value="true"]').prop("checked", needRepairFlag);
     $('input[name="needsRepair"][value="false"]').prop("checked", !needRepairFlag);
@@ -212,7 +223,9 @@ function filterByPart() {
 }
 
 function resetScreens() {
-    $(LIST_RECORDS_BUTTON_IDENTIFIER).show();
+    $(ADD_BUTTON_IDENTIFIER).prop("disabled", false);
+    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", false);
+    $('#filterPart').val('');
     $('#filterPart').hide();
     $('#listTable').empty();
     $(UPDATE_FORM_IDENTIFIER).empty();
@@ -258,7 +271,6 @@ function watchAddMaintenanceBtn() {
 
 function watchListRecordsBtn() {
   $(LIST_RECORDS_BUTTON_IDENTIFIER).click((event) => {
-    console.log("aaa");
     event.preventDefault();
     getAndDisplayMaintenanceRecords();
   });
