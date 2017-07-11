@@ -136,7 +136,7 @@ describe('maintenance log API resource', function() {
           resRecord.part.should.equal(record.part);
           resRecord.status.should.equal(record.status);
           resRecord.needsRepair.should.equal(record.needsRepair);
-          //resRecord.lastMaintenance.should.equal(record.lastMaintenance); //BDC_Need correct time format
+          resRecord.lastMaintenance.should.equal(record.lastMaintenance.toISOString()); //BDC_Need correct time format
           resRecord.frequency.should.equal(record.frequency);
         });
     });
@@ -171,7 +171,7 @@ describe('maintenance log API resource', function() {
           res.body.part.should.equal(newRecord.part);
           res.body.status.should.equal(newRecord.status);
           res.body.needsRepair.should.equal(newRecord.needsRepair);
-          //res.body.lastMaintenance.should.equal(newRecord.lastMaintenance); //BDC_Need correct time format
+          res.body.lastMaintenance.should.equal(newRecord.lastMaintenance.toISOString()); //BDC_Need correct time format
           res.body.frequency.should.equal(newRecord.frequency);
           return MaintenanceRecord.findById(res.body.id).exec();
         })
@@ -179,7 +179,7 @@ describe('maintenance log API resource', function() {
           record.part.should.equal(newRecord.part);
           record.status.should.equal(newRecord.status);
           record.needsRepair.should.equal(newRecord.needsRepair);
-          //record.lastMaintenance.should.equal(newRecord.lastMaintenance); //BDC_Need correct time format
+          record.lastMaintenance.should.eql(newRecord.lastMaintenance);
           record.frequency.should.equal(newRecord.frequency);
         });
     });
@@ -218,7 +218,7 @@ describe('maintenance log API resource', function() {
           res.body.part.should.equal(updateData.part);
           res.body.status.should.equal(updateData.status);
           res.body.needsRepair.should.equal(updateData.needsRepair);
-          //res.body.lastMaintenance.should.equal(updateData.lastMaintenance);
+          res.body.lastMaintenance.should.equal(updateData.lastMaintenance);
           res.body.frequency.should.equal(updateData.frequency);
 
           return MaintenanceRecord.findById(res.body.id).exec();
@@ -227,7 +227,7 @@ describe('maintenance log API resource', function() {
           record.part.should.equal(updateData.part);
           record.status.should.equal(updateData.status);
           record.needsRepair.should.equal(updateData.needsRepair);
-          //record.lastMaintenance.should.equal(updateData.lastMaintenance);
+          record.lastMaintenance.toISOString().should.equal(updateData.lastMaintenance);
           record.frequency.should.equal(updateData.frequency);
         });
     });

@@ -7,6 +7,15 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+/*
+Color Scheme
+darkgrey: #595241
+lightgray: #b8ae9c
+lightblue: #accfcc
+white: #FFFFFF
+red: #8a0917
+*/
+
 /* filter table */
 #filterPart {
     background-image: url('searchicon.png'); /* Add a search icon to input */

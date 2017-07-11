@@ -5,6 +5,7 @@ const UPDATE_FORM_IDENTIFIER = '#updateForm';
 const DELETE_CONFIRMATION_IDENTIFIER = '.deleteConfirmation';
 const RESULTS_FROM_REQUEST_IDENTIFIER = '.resultsFromRequest';
 const ADD_BUTTON_IDENTIFIER = '.addButton';
+const LIST_RECORDS_BUTTON_IDENTIFIER = '.listRecordsButton';
 const MAINTENANCE_LOGGER_URL = '/records';
 
 function getMaintenanceRecords(callbackFn) {
@@ -54,20 +55,24 @@ function getSingleMaintenanceRecords(id, callbackFn) {
 function displayMaintenanceRecords(data) {
     resetScreens();
     $('#filterPart').show();
-    for (var index in data) {
-	   $('#listTable').append(
-        '<tr>' +
-        '<td>' + data[index].part + '</td>' +
-        '<td>' + data[index].status + '</td>' +
-        '<td>' + data[index].needsRepair + '</td>' +
-        '<td>' + data[index].lastMaintenance + '</td>' +
-        '<td>' + data[index].frequency + '</td>' +
-        '<td>' + 
-            '<button type="button" onclick=viewUpdateRecord("' + data[index].id + '")>Update</button>' + 
-            '<button type="button" onclick=viewDeleteRecord("' + data[index].id + '")>Delete</button>' + 
-        '</td>' +
-        '</tr>');
-    }
+
+    $('#listTable').append(
+        data.map((record) => { return(`
+            <tr>
+            <td> ${record.part} </td>
+            <td> ${record.status} </td>
+            <td> ${record.needsRepair} </td>
+            <td> ${record.lastMaintenance} </td>
+            <td> ${record.frequency} </td>
+            <td> 
+                <button type="button" onclick=viewUpdateRecord("${record.id}")>Update</button> 
+                <button type="button" onclick=viewDeleteRecord("${record.id}")>Delete</button> 
+            </td>
+            </tr>
+        `)})
+    );
+
+    $(LIST_RECORDS_BUTTON_IDENTIFIER).hide();
 }
 
 Date.prototype.toDateInputValue = (function() {
@@ -78,53 +83,59 @@ Date.prototype.toDateInputValue = (function() {
 
 function displayAddRecord(data) {
     resetScreens();
-    $(ADD_FORM_IDENTIFIER).append(
-        'Part Name: <br>' + 
-        '<input type="text" name="part" placeholder="part name" required> <br>' +
-        'Status: <br>' + 
-        '<input type="text" name="status" placeholder="current status" required> <br>' +
-        'Needs repair?: <br>' + 
-        '<input type="checkbox" name="repair" placeholder="off"> <br>' +
-        'Last Maintenance: <br>' + 
-        '<input type="date" name="lastMaintenance" required> <br>' +
-        'Freq (days): <br>' + 
-        '<input type="text" name="frequency" value="0" required> <br>' + 
-        '<br><br>' +
-        '<input type="submit" value="Add">'
-    );
+    $(ADD_FORM_IDENTIFIER).append(`
+        Part Name: <br> 
+        <input type="text" name="part" placeholder="part name" required> <br>
+        Status: <br> 
+        <input type="text" name="status" placeholder="current status" required> <br>
+        Needs repair?: <br> 
+        <input type="radio" name="needsRepair" value="true"> true <br>
+        <input type="radio" name="needsRepair" value="false" checked> false <br>
+        Last Maintenance: <br> 
+        <input type="date" name="lastMaintenance" value required> <br>
+        Freq (days): <br> 
+        <input type="number" name="frequency" value="0" required> <br> 
+        <br><br>
+        <input type="submit" value="Add">
+    `);
     $('input[name="lastMaintenance"]').val(new Date().toDateInputValue());
 }
 
 function displayUpdateRecord(data) {
     resetScreens();
-    $(UPDATE_FORM_IDENTIFIER).append(
-        'Part Name: <br>' + 
-        '<input type="text" name="part" value="' + data.part + '" required> <br>' +
-        'Status: <br>' + 
-        '<input type="text" name="status" value="' + data.status + '" required> <br>' +
-        'Repair: <br>' + 
-        '<input type="checkbox" name="repair" value="' + data.needsRepair + '"> <br>' +
-        'Last Maintenance: <br>' + 
-        '<input type="date" name="lastMaintenance" value=' + data.lastMaintenance.substring(0,10) + ' required> <br>' +
-        'Frequency: <br>' + 
-        '<input type="text" name="frequency" value=' + data.frequency + ' required> <br>' + 
-        'id: <br>' + 
-        '<input type="text" name="id" value="' + data.id + '" readonly> <br>' + 
-        '<br><br>' +
-        '<input type="submit" value="Update">'
-    );
+    $(UPDATE_FORM_IDENTIFIER).append(`
+        Part Name: <br> 
+        <input type="text" name="part" value="${data.part}" required> <br>
+        Status: <br> 
+        <input type="text" name="status" value="${data.status}" required> <br>
+        Repair: <br> 
+        <input type="radio" name="needsRepair" value="true"> true <br>
+        <input type="radio" name="needsRepair" value="false"> false <br>
+        Last Maintenance: <br> 
+        <input type="date" name="lastMaintenance" value=${data.lastMaintenance.substring(0,10)} required> <br>
+        Frequency: <br> 
+        <input type="number" name="frequency" value=${data.frequency}  required> <br> 
+        id: <br> 
+        <input type="text" name="id" value="${data.id}" readonly> <br> 
+        <br><br>
+        <input type="submit" value="Update">
+    `);
+console.log(data.needsRepair);
+    let needRepairFlag = (data.needsRepair == 'true');
+    $('input[name="needsRepair"][value="true"]').prop("checked", needRepairFlag);
+    $('input[name="needsRepair"][value="false"]').prop("checked", !needRepairFlag);
 }
 
 function displayDeleteRecord(data) {
     resetScreens();
-    $(DELETE_CONFIRMATION_IDENTIFIER).append(
-        '<p>Part Name: ' + data.part + '</p>' +
-        '<p>Status: ' + data.status + '</p>' +
-        '<p>Repair: ' + data.needsRepair + '</p>' +
-        '<p>Last Maintenance: ' + data.lastMaintenance + '</p>' +
-        '<p>Freq: ' + data.frequency + '</p>' +
-        '<br><br><input class="js-delete-record-btn" id=' + data.id + ' type="button" value="Delete">'
-    );
+    $(DELETE_CONFIRMATION_IDENTIFIER).append(`
+        <p>Part Name:  ${data.part} </p>
+        <p>Status: ${data.status} </p>
+        <p>Repair: ${data.needsRepair} </p>
+        <p>Last Maintenance: ${data.lastMaintenance} </p>
+        <p>Freq: ${data.frequency} </p>
+        <br><br><input class="js-delete-record-btn" id= ${data.id}  type="button" value="Delete">
+    `);
 }
 
 function displayAddResults(data) {
@@ -201,6 +212,7 @@ function filterByPart() {
 }
 
 function resetScreens() {
+    $(LIST_RECORDS_BUTTON_IDENTIFIER).show();
     $('#filterPart').hide();
     $('#listTable').empty();
     $(UPDATE_FORM_IDENTIFIER).empty();
@@ -240,8 +252,15 @@ function watchShowMaintenanceBtn() {
 
 function watchAddMaintenanceBtn() {
   $(ADD_BUTTON_IDENTIFIER).click((event) => {
-    event.preventDefault();
     displayAddRecord();
+  });
+}
+
+function watchListRecordsBtn() {
+  $(LIST_RECORDS_BUTTON_IDENTIFIER).click((event) => {
+    console.log("aaa");
+    event.preventDefault();
+    getAndDisplayMaintenanceRecords();
   });
 }
 
@@ -252,5 +271,6 @@ $(function() {
     watchAddBtn();
     watchShowMaintenanceBtn();
     watchAddMaintenanceBtn();
+    watchListRecordsBtn();
     getAndDisplayMaintenanceRecords();
 });
