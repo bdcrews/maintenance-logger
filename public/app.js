@@ -9,6 +9,7 @@ const LIST_RECORDS_BUTTON_IDENTIFIER = '.listRecordsButton';
 const SHOW_FILTERS_BUTTON_IDENTIFIER = '.showFiltersButton';
 const FILTER_FORM_IDENTIFIER = '#filterForm';
 const MAINTENANCE_LOGGER_URL = '/records';
+const RECORDS_TABLE_IDENTIFIER = '#listTable';
 
 function getMaintenanceRecords(query, callbackFn) {
     $.ajax({
@@ -63,20 +64,8 @@ function getSingleMaintenanceRecords(id, callbackFn) {
 
 function displayMaintenanceRecords(data) {
     resetScreens();
-    $('#filterPart').show();
 
-    $('#listTable').append(`
-        <tr class="header">
-            <th style="width:20%;">Part Name</th>
-            <th style="width:20%;">Status</th>
-            <th style="width:20%;">Repair</th>
-            <th style="width:20%;">Last Maintenance</th>
-            <th style="width:10%;">Freq.</th>
-            <th style="width:10%;"></th>
-        </tr>
-        `);
-
-    $('#listTable').append(
+    $('#listTable tbody').append(
         data.map((record) => { return(`
             <tr>
             <td> ${record.part} </td>
@@ -91,8 +80,6 @@ function displayMaintenanceRecords(data) {
             </tr>
         `)})
     );
-
-//    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", true);
 }
 
 Date.prototype.toDateInputValue = (function() {
@@ -209,21 +196,31 @@ function viewDeleteRecord(id) {
 function getAndDisplayMaintenanceRecords() {
 
     let data = $(FILTER_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
- console.log(data);
-    let query = {};
-    if(data.part != '') query.part = data.part;
-    if(data.status != '') query.status = data.status;
-    if(data.needsRepair != 'any') query.needsRepair = (data.needsRepair=='true');
+
+    let filter = {};
+    if(data.part != '') filter.part = data.part;
+    if(data.status != '') filter.status = data.status;
+    if(data.needsRepair != 'any') filter.needsRepair = (data.needsRepair=='true');
 
     if (data.beginDate != '') {
-        query.lastMaintenance = {};
-        query.lastMaintenance.$gt =  data.beginDate;
+        filter.lastMaintenance = {};
+        filter.lastMaintenance.$gt =  data.beginDate;
     }
     if (data.endDate != '') {
-        query.lastMaintenance = query.lastMaintenance || {};
-        query.lastMaintenance.$lt =  data.endDate;
+        filter.lastMaintenance = filter.lastMaintenance || {};
+        filter.lastMaintenance.$lt =  data.endDate;
     }
-console.log(query);
+
+    let location = {
+        currentPage: 0,
+        pageQuantity: 20
+    };
+
+    let query = {
+        filter: filter, 
+        location: location
+    }
+
 	getMaintenanceRecords(query, displayMaintenanceRecords);
 }
 
@@ -239,33 +236,10 @@ function updateRecord(record) {
     UpdateMaintenanceRecord(record, displayUpdateResults);
 }
 
-function filterByPart() {
-  // Declare variables 
-  var input, filter, table, tr, td, i;
-  input = document.getElementById('filterPart');
-  filter = input.value.toUpperCase();
-  table = document.getElementById('listTable');
-  tr = table.getElementsByTagName('tr');
-
-  // Loop through all table rows, and hide those who don't match the search query
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName('td')[0];
-    if (td) {
-      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = '';
-      } else {
-        tr[i].style.display = 'none';
-      }
-    } 
-  }
-}
-
 function resetScreens() {
     $(ADD_BUTTON_IDENTIFIER).prop('disabled', false);
 //    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", false);
-    $('#filterPart').val('');
-    $('#filterPart').hide();
-    $('#listTable').empty();
+    $('#listTable tbody').empty();
     $(UPDATE_FORM_IDENTIFIER).empty();
     $(ADD_FORM_IDENTIFIER).empty();
     $(DELETE_CONFIRMATION_IDENTIFIER).empty();
@@ -321,7 +295,7 @@ function watchShowFiltersBtn() {
         $(SHOW_FILTERS_BUTTON_IDENTIFIER).text("Hide filters");
     }
   });
-}
+};
 
 //  on page load do this
 $(function() {

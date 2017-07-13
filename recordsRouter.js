@@ -26,8 +26,13 @@ const requiredFields = (fields) => {
 
 router.get('/',
   (req, res) => {
+    let pageQuantity = parseInt(req.query.location.pageQuantity);
+    let skipAmount = parseInt(req.query.location.currentPage) * pageQuantity;
+
   MaintenanceRecord
-    .find(req.query)
+    .find(req.query.query)
+    .skip(skipAmount)
+    .limit(pageQuantity)
     .exec()
     .then(records => {
       res.json(records.map(record => record.apiRepr()));

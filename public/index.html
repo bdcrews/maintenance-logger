@@ -15,9 +15,16 @@
 	<form id="filterForm"></form>
 	<button type="button" class="listRecordsButton">List records</button>
 
-	<input type="text" id="filterPart" onkeyup="filterByPart()" placeholder="Search for part..">
-
 	<table id="listTable">
+			<thead><tr class="header">
+            <th style="width:20%;">Part Name</th>
+            <th style="width:20%;">Status</th>
+            <th style="width:20%;">Repair</th>
+            <th style="width:20%;">Last Maintenance</th>
+            <th style="width:10%;">Freq.</th>
+            <th style="width:10%;"></th>
+        </tr></thead>
+        <tbody></tbody>
 	</table>
 
 	<form id="updateForm"></form>
