@@ -216,9 +216,14 @@ function getAndDisplayMaintenanceRecords() {
         pageQuantity: 20
     };
 
+    let sort = {
+        part: 1
+    };
+
     let query = {
         filter: filter, 
-        location: location
+        location: location,
+        sort: sort
     }
 
 	getMaintenanceRecords(query, displayMaintenanceRecords);

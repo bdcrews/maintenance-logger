@@ -93,8 +93,14 @@ describe('maintenance log API resource', function() {
       //    3. prove the number of records we got back is equal to number
       //       in db.
       let res;
+      let query = {};
+      query.query = {};
+      query.location = {pageQuantity: 20};
+      query.sort = {};
+
       return chai.request(app)
         .get('/records')
+        .query(query)
         .then(_res => {
           res = _res;
           res.should.have.status(200);
@@ -114,8 +120,13 @@ describe('maintenance log API resource', function() {
       // Strategy: Get back all records, and ensure they have expected keys
 
       let resRecord;
+      let query = {};
+      query.query = {};
+      query.location = {pageQuantity: 20};
+      query.sort = {};
       return chai.request(app)
         .get('/records')
+        .query(query)
         .then(function(res) {
 
           res.should.have.status(200);

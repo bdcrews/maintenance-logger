@@ -31,6 +31,7 @@ router.get('/',
 
   MaintenanceRecord
     .find(req.query.query)
+    .sort(req.query.sort)
     .skip(skipAmount)
     .limit(pageQuantity)
     .exec()
