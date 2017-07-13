@@ -6,10 +6,19 @@ const DELETE_CONFIRMATION_IDENTIFIER = '.deleteConfirmation';
 const RESULTS_FROM_REQUEST_IDENTIFIER = '.resultsFromRequest';
 const ADD_BUTTON_IDENTIFIER = '.addButton';
 const LIST_RECORDS_BUTTON_IDENTIFIER = '.listRecordsButton';
+const SHOW_FILTERS_BUTTON_IDENTIFIER = '.showFiltersButton';
+const FILTER_FORM_IDENTIFIER = '#filterForm';
 const MAINTENANCE_LOGGER_URL = '/records';
 
-function getMaintenanceRecords(callbackFn) {
-    $.getJSON(MAINTENANCE_LOGGER_URL, callbackFn);
+function getMaintenanceRecords(query, callbackFn) {
+    $.ajax({
+        method: 'GET',
+        url: MAINTENANCE_LOGGER_URL,
+        data: query,
+        success: callbackFn,
+        dataType: 'json',
+        contentType: 'application/json'
+    }); 
 }
 
 function addMaintenanceRecord(record, callbackFn) {
@@ -83,7 +92,7 @@ function displayMaintenanceRecords(data) {
         `)})
     );
 
-    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", true);
+//    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", true);
 }
 
 Date.prototype.toDateInputValue = (function() {
@@ -101,8 +110,8 @@ function displayAddRecord(data) {
         Status: <br> 
         <input type="text" name="status" placeholder="current status" required> <br>
         Needs repair?: <br> 
-        <input type="radio" name="needsRepair" value="true"> true <br>
-        <input type="radio" name="needsRepair" value="false" checked> false <br>
+        <input type="radio" name="needsRepair" value=true> true <br>
+        <input type="radio" name="needsRepair" value=false checked> false <br>
         Last Maintenance: <br> 
         <input type="date" name="lastMaintenance" value required> <br>
         Freq (days): <br> 
@@ -121,8 +130,8 @@ function displayUpdateRecord(data) {
         Status: <br> 
         <input type="text" name="status" value="${data.status}" required> <br>
         Repair: <br> 
-        <input type="radio" name="needsRepair" value="true"> true <br>
-        <input type="radio" name="needsRepair" value="false"> false <br>
+        <input type="radio" name="needsRepair" value=true> true <br>
+        <input type="radio" name="needsRepair" value=false> false <br>
         Last Maintenance: <br> 
         <input type="date" name="lastMaintenance" value=${data.lastMaintenance.substring(0,10)} required> <br>
         Frequency: <br> 
@@ -132,9 +141,8 @@ function displayUpdateRecord(data) {
         <br><br>
         <input type="submit" value="Update">
     `);
-    let needRepairFlag = (data.needsRepair == 'true');
-    $('input[name="needsRepair"][value="true"]').prop("checked", needRepairFlag);
-    $('input[name="needsRepair"][value="false"]').prop("checked", !needRepairFlag);
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="needsRepair"][value=true]').prop("checked", data.needsRepair);
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="needsRepair"][value=false]').prop("checked", !data.needsRepair);
 }
 
 function displayDeleteRecord(data) {
@@ -146,6 +154,19 @@ function displayDeleteRecord(data) {
         <p>Last Maintenance: ${data.lastMaintenance} </p>
         <p>Freq: ${data.frequency} </p>
         <br><br><input class="js-delete-record-btn" id= ${data.id}  type="button" value="Delete">
+    `);
+}
+
+function createFiltersForm(data) {
+    $(FILTER_FORM_IDENTIFIER).hide();
+    $(FILTER_FORM_IDENTIFIER).append(`
+        <ul>
+        <li><p>Part name: </p><input type="text" name="part" placeholder="all parts"></li>
+        <li><p>Status: </p><input type="text" name="status" placeholder="any status"></li>
+        <li><p>Needs repair: </p><input type="radio" name="needsRepair" value=true>true <input type="radio" name="needsRepair" value=false>false<input type="radio" name="needsRepair" value="any" checked="checked">any</li>
+        <li><p>Begin date: </p><input type="date" name="beginDate" placeholder="begin date"></li>
+        <li><p>End date: </p><input type="date" name="endDate" placeholder="end date"></li>
+        </ul>
     `);
 }
 
@@ -186,7 +207,24 @@ function viewDeleteRecord(id) {
 }
 
 function getAndDisplayMaintenanceRecords() {
-	getMaintenanceRecords(displayMaintenanceRecords);
+
+    let data = $(FILTER_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+ console.log(data);
+    let query = {};
+    if(data.part != '') query.part = data.part;
+    if(data.status != '') query.status = data.status;
+    if(data.needsRepair != 'any') query.needsRepair = (data.needsRepair=='true');
+
+    if (data.beginDate != '') {
+        query.lastMaintenance = {};
+        query.lastMaintenance.$gt =  data.beginDate;
+    }
+    if (data.endDate != '') {
+        query.lastMaintenance = query.lastMaintenance || {};
+        query.lastMaintenance.$lt =  data.endDate;
+    }
+console.log(query);
+	getMaintenanceRecords(query, displayMaintenanceRecords);
 }
 
 function addRecord(record){
@@ -223,8 +261,8 @@ function filterByPart() {
 }
 
 function resetScreens() {
-    $(ADD_BUTTON_IDENTIFIER).prop("disabled", false);
-    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", false);
+    $(ADD_BUTTON_IDENTIFIER).prop('disabled', false);
+//    $(LIST_RECORDS_BUTTON_IDENTIFIER).prop("disabled", false);
     $('#filterPart').val('');
     $('#filterPart').hide();
     $('#listTable').empty();
@@ -236,7 +274,8 @@ function resetScreens() {
 function watchAddBtn() {
   $(ADD_FORM_IDENTIFIER).submit(function(event) {
     event.preventDefault();
-    var data = $(ADD_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    let data = $(ADD_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    if('needsRepair' in data) data.needsRepair = (data.needsRepair == 'true');
     addRecord(data);
   });
 }
@@ -244,7 +283,8 @@ function watchAddBtn() {
 function watchUpdateBtn() {
   $(UPDATE_FORM_IDENTIFIER).submit(function(event) {
     event.preventDefault();
-    var data = $(UPDATE_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    let data = $(UPDATE_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    if('needsRepair' in data) data.needsRepair = (data.needsRepair == 'true');
     updateRecord(data);
   });
 }
@@ -256,12 +296,6 @@ function watchDeleteBtn() {
   });
 }
 
-function watchShowMaintenanceBtn() {
-  $(RESULTS_FROM_REQUEST_IDENTIFIER).on('click', '.js-show-maintenance-record-btn', function(event) {
-    event.preventDefault();
-    getAndDisplayMaintenanceRecords();
-  });
-}
 
 function watchAddMaintenanceBtn() {
   $(ADD_BUTTON_IDENTIFIER).click((event) => {
@@ -276,13 +310,27 @@ function watchListRecordsBtn() {
   });
 }
 
+function watchShowFiltersBtn() {
+  $(SHOW_FILTERS_BUTTON_IDENTIFIER).click((event) => {
+    event.preventDefault();
+    $(FILTER_FORM_IDENTIFIER).toggle('fast');
+    if($(FILTER_FORM_IDENTIFIER).css('display') == 'none') {
+        $(SHOW_FILTERS_BUTTON_IDENTIFIER).text("Show filters");
+    }
+    else {
+        $(SHOW_FILTERS_BUTTON_IDENTIFIER).text("Hide filters");
+    }
+  });
+}
+
 //  on page load do this
 $(function() {
+    createFiltersForm();
     watchUpdateBtn();
     watchDeleteBtn();
     watchAddBtn();
-    watchShowMaintenanceBtn();
     watchAddMaintenanceBtn();
     watchListRecordsBtn();
+    watchShowFiltersBtn();
     getAndDisplayMaintenanceRecords();
 });

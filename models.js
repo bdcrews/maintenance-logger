@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const maintenanceRecordSchema = mongoose.Schema({
   part: {type: String},
   status: {type: String},
-  needsRepair: {type: String, default: "false"},
+  needsRepair: {type: Boolean, default: false},
   lastMaintenance: {type: Date, default: Date.now},
   frequency: {type: Number}
 });

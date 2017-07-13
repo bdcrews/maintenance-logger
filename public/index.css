@@ -50,3 +50,22 @@ red: #8a0917
     /* Add a grey background color to the table header and on hover */
     background-color: #f1f1f1;
 }
+
+#filterForm p {
+    display: inline-block;
+    width: 120px;
+    height: ;
+}
+
+#filterForm {
+    border: 1px solid blue;
+}
+
+#filterForm li {
+    height: 40px;
+}
+
+#filterForm ul {
+    list-style: none;
+}
+

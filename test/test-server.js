@@ -152,7 +152,7 @@ describe('maintenance log API resource', function() {
       const newRecord = {
     	part: faker.random.word(),
     	status: faker.hacker.adjective(),
-    	needsRepair: "on",
+    	needsRepair: faker.random.boolean(),
     	lastMaintenance: faker.date.past(10),
     	frequency: faker.random.number()
       };
@@ -196,7 +196,7 @@ describe('maintenance log API resource', function() {
       const updateData = {
       	part:  'testPart',
       	status: 'testStatus',
-      	needsRepair: 'on',
+      	needsRepair: true,
       	lastMaintenance: '2017-09-01T00:00:00.000Z',
       	frequency: 99
       };

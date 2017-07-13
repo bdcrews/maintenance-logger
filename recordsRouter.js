@@ -24,9 +24,10 @@ const requiredFields = (fields) => {
   }
 }
 
-router.get('/', (req, res) => {
+router.get('/',
+  (req, res) => {
   MaintenanceRecord
-    .find()
+    .find(req.query)
     .exec()
     .then(records => {
       res.json(records.map(record => record.apiRepr()));
@@ -44,6 +45,7 @@ router.post('/',
   jsonParser,  
   requiredFields(['part', 'status', 'lastMaintenance', 'frequency']),
   (req, res) => {
+  console.log(req.body);
     MaintenanceRecord.create({
       part: req.body.part,
       status: req.body.status,
