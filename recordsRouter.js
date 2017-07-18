@@ -28,16 +28,15 @@ router.get('/',
   (req, res) => {
     let pageQuantity = parseInt(req.query.location.pageQuantity);
     let skipAmount = parseInt(req.query.location.currentPage) * pageQuantity;
-
-  MaintenanceRecord
-    .find(req.query.query)
-    .sort(req.query.sort)
-    .skip(skipAmount)
-    .limit(pageQuantity)
-    .exec()
-    .then(records => {
-      res.json(records.map(record => record.apiRepr()));
-    });
+    MaintenanceRecord
+      .find(req.query.filter)
+      .sort(req.query.sort)
+      .skip(skipAmount)
+      .limit(pageQuantity)
+      .exec()
+      .then(records => {
+        res.json(records.map(record => record.apiRepr()));
+        });
 });
 
 router.get('/:id', (req, res) => {
@@ -51,7 +50,6 @@ router.post('/',
   jsonParser,  
   requiredFields(['part', 'status', 'lastMaintenance', 'frequency']),
   (req, res) => {
-  console.log(req.body);
     MaintenanceRecord.create({
       part: req.body.part,
       status: req.body.status,

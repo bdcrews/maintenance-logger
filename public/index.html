@@ -5,30 +5,88 @@
     <link href="index.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-	<h1>Maintenance Logger</h1>
+	<h1><span>Maintenance Logger<span></h1>
 
 	<div class="resultsFromRequest"></div>
 
-	<button type="button" class="addButton">Add maintenance record</button>
-	<button type="button" class="showFiltersButton">Show Filters</button><br><br>
+	<button type="button" class="showFiltersButton"></button>
+	<button type="button" class="addButton" style="background-image: url('/add-button.png')"></button><br><br>
 
 	<form id="filterForm"></form>
-	<button type="button" class="listRecordsButton">List records</button>
 
-	<table id="listTable">
-			<thead><tr class="header">
-            <th style="width:20%;">Part Name</th>
-            <th style="width:20%;">Status</th>
-            <th style="width:20%;">Repair</th>
-            <th style="width:20%;">Last Maintenance</th>
-            <th style="width:10%;">Freq.</th>
-            <th style="width:10%;"></th>
-        </tr></thead>
-        <tbody></tbody>
-	</table>
+	<section class="searchResults">
+		<table id="listTable">
+			<thead><tr class="noselect">
+	            <th  style="width:30%;" data-sort="part">Part Name <img src="sort-down.png"></th>
+	            <th style="width:10%;" data-sort="status">Status <img src=""></th>
+	            <th style="width:10%;" data-sort="needsRepair">Repair <img src=""></th>
+	            <th style="width:40%;" data-sort="lastMaintenance">Last Maintenance <img src=""></th>
+	            <th style="width:10%;" data-sort="frequency">Freq. <img src=""></th>
+	        </tr></thead>
+	        <tbody></tbody>
+	        <tfoot>
+			</tfoot>
+		</table>
+		<nav>
+			<button type="button" class="prevButton" disabled>Prev</button>
+			<div class="pageControl">
+				Page: 
+				<input type="number" name="currentPage" value="0" readonly>
+				<select id="recordsPerPage">
+					<option value=10> 10 per page</option selected>
+					<option value=20> 20 per page</option>
+					<option value=40> 40 per page</option>
+					<option value=100> 100 per page</option>
+					<option value="all"> all</option>
+				</select>
+			</div>
+			<button type="button" class="nextButton">Next</button>
+		</nav>
+	</section>
 
-	<form id="updateForm"></form>
-	<form id="addForm"></form>
+
+	<div id="updateOverlay">
+		<form id="updateForm">
+			<h2>Update record</h2>
+		    <label>Part Name:</label> 
+        	<input type="text" name="part" required auto> <br>
+            <label>Status:</label> 
+            <input type="text" name="status" required> <br>
+            <label>Repair:</label> 
+            <input type="radio" name="needsRepair" value=true> true 
+            <input type="radio" name="needsRepair" value=false> false <br>
+            <label>Last Maintenance:</label> 
+            <input type="date" name="lastMaintenance" required> <br>
+            <label>Frequency:</label> 
+            <input type="number" name="frequency" required> <br> 
+            <label>id:</label> 
+            <input type="text" name="id" readonly> <br> 
+            <br><br>
+            <input type="submit" class="button" value="Update">
+            <input class="js-delete-record-btn button" type="button" value="Delete">
+            <input class="js-cancel-btn button" type="button" value="Cancel">
+		</form>
+	</div>
+
+	<div id="addOverlay">
+		<form id="addForm">
+			<h2>Add new record</h2>
+			<label>Part Name:</label>
+        	<input type="text" name="part" placeholder="part name" required> <br>
+        	<label>Status:</label>
+        	<input type="text" name="status" placeholder="current status" required> <br>
+		    <label>Needs repair?:</label>
+	        <input type="radio" name="needsRepair" value=true> true 
+	        <input type="radio" name="needsRepair" value=false checked> false <br>
+	        <label>Last Maintenance:</label>
+	        <input type="date" name="lastMaintenance" required> <br>
+	        <label>Freq (days):</label>
+	        <input type="number" name="frequency" value="0" required> <br> 
+	        <br><br>
+	        <input type="submit" class="button" value="Add">
+	        <input class="js-cancel-btn button" type="button" value="Cancel">
+		</form>
+	</div>
 
 	<div class="deleteConfirmation"></div>            
 	
