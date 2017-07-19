@@ -2,13 +2,27 @@
 
 const ADD_FORM_IDENTIFIER = '#addForm';
 const UPDATE_FORM_IDENTIFIER = '#updateForm';
-const DELETE_CONFIRMATION_IDENTIFIER = '.deleteConfirmation';
-const RESULTS_FROM_REQUEST_IDENTIFIER = '.resultsFromRequest';
+const RESULT_POPUP_IDENTIFIER = '#resultPopup';
+const RESULT_FROM_REQUEST_IDENTIFIER = '.resultFromRequest';
 const ADD_BUTTON_IDENTIFIER = '.addButton';
+const NEXT_BUTTON_IDENTIFIER = '.nextButton';
+const PREV_BUTTON_IDENTIFIER = '.prevButton';
+const SEARCH_BUTTON_IDENTIFIER = '.searchButton';
+const SHOW_FILTERS_BUTTON_IDENTIFIER = '.showFiltersButton';
+const FILTER_FORM_IDENTIFIER = '#filterForm';
 const MAINTENANCE_LOGGER_URL = '/records';
+const RECORDS_TABLE_IDENTIFIER = '#listTable';
+const RECORDS_PER_PAGE_IDENTIFIER = '#recordsPerPage';
 
-function getMaintenanceRecords(callbackFn) {
-    $.getJSON(MAINTENANCE_LOGGER_URL, callbackFn);
+function getMaintenanceRecords(query, callbackFn) {
+    $.ajax({
+        method: 'GET',
+        url: MAINTENANCE_LOGGER_URL,
+        data: query,
+        success: callbackFn,
+        dataType: 'json',
+        contentType: 'application/json'
+    }); 
 }
 
 function addMaintenanceRecord(record, callbackFn) {
@@ -52,102 +66,103 @@ function getSingleMaintenanceRecords(id, callbackFn) {
 }
 
 function displayMaintenanceRecords(data) {
-    resetScreens();
-    $('#filterPart').show();
-    for (var index in data) {
-	   $('#listTable').append(
-        '<tr>' +
-        '<td>' + data[index].part + '</td>' +
-        '<td>' + data[index].status + '</td>' +
-        '<td>' + data[index].needsRepair + '</td>' +
-        '<td>' + data[index].lastMaintenance + '</td>' +
-        '<td>' + data[index].frequency + '</td>' +
-        '<td>' + 
-            '<button type="button" onclick=viewUpdateRecord("' + data[index].id + '")>Update</button>' + 
-            '<button type="button" onclick=viewDeleteRecord("' + data[index].id + '")>Delete</button>' + 
-        '</td>' +
-        '</tr>');
-    }
+
+    $('#listTable tbody').empty();
+    $('#listTable tbody').append(
+        data.map((record) => { return(`
+            <tr data-id="${record.id}" >
+            <td> ${record.part} </td>
+            <td> ${record.status} </td>
+            <td> ${record.needsRepair} </td>
+            <td> ${new Date(record.lastMaintenance)} </td>
+            <td> ${record.frequency} </td>
+            </tr>
+        `)})
+    );
 }
 
 Date.prototype.toDateInputValue = (function() {
     var local = new Date(this);
     local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
     return local.toJSON().slice(0,10);
-});
+}); 
 
-function displayAddRecord(data) {
-    resetScreens();
-    $(ADD_FORM_IDENTIFIER).append(
-        'Part Name: <br>' + 
-        '<input type="text" name="part" placeholder="part name" required> <br>' +
-        'Status: <br>' + 
-        '<input type="text" name="status" placeholder="current status" required> <br>' +
-        'Needs repair?: <br>' + 
-        '<input type="checkbox" name="repair" placeholder="off"> <br>' +
-        'Last Maintenance: <br>' + 
-        '<input type="date" name="lastMaintenance" required> <br>' +
-        'Freq (days): <br>' + 
-        '<input type="text" name="frequency" value="0" required> <br>' + 
-        '<br><br>' +
-        '<input type="submit" value="Add">'
-    );
-    $('input[name="lastMaintenance"]').val(new Date().toDateInputValue());
+function displayFilter(show, instant = false ) {
+    if(show) {
+        $(FILTER_FORM_IDENTIFIER).slideDown( instant ? 0 : 'fast');
+        console.log($(SHOW_FILTERS_BUTTON_IDENTIFIER).attr('background'));
+        $(SHOW_FILTERS_BUTTON_IDENTIFIER).css('background-image', 'url(/filter-up.png)');
+    }
+    else {
+        $(FILTER_FORM_IDENTIFIER).slideUp(instant ? 0 : 'fast');
+        $(SHOW_FILTERS_BUTTON_IDENTIFIER).css('background-image', 'url(/filter-down.png)');
+    }
+}
+
+function displayAddRecord(data) { 
+    $('#addOverlay').css("display","flex");
+    $(ADD_FORM_IDENTIFIER + ' input[name="lastMaintenance"]').val(new Date().toDateInputValue());
+
+    $(ADD_FORM_IDENTIFIER + ' input[name="part"]').focus();
 }
 
 function displayUpdateRecord(data) {
-    resetScreens();
-    $(UPDATE_FORM_IDENTIFIER).append(
-        'Part Name: <br>' + 
-        '<input type="text" name="part" value="' + data.part + '" required> <br>' +
-        'Status: <br>' + 
-        '<input type="text" name="status" value="' + data.status + '" required> <br>' +
-        'Repair: <br>' + 
-        '<input type="checkbox" name="repair" value="' + data.needsRepair + '"> <br>' +
-        'Last Maintenance: <br>' + 
-        '<input type="date" name="lastMaintenance" value=' + data.lastMaintenance.substring(0,10) + ' required> <br>' +
-        'Frequency: <br>' + 
-        '<input type="text" name="frequency" value=' + data.frequency + ' required> <br>' + 
-        'id: <br>' + 
-        '<input type="text" name="id" value="' + data.id + '" readonly> <br>' + 
-        '<br><br>' +
-        '<input type="submit" value="Update">'
-    );
+    $('#updateOverlay').css("display","flex");
+
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="part"]').val(data.part);
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="status"]').val(data.status);
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="needsRepair"][value=true]').prop("checked", data.needsRepair);
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="needsRepair"][value=false]').prop("checked", !data.needsRepair);
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="lastMaintenance"]').val(data.lastMaintenance.substring(0,10));
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="frequency"]').val(data.frequency);
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="id"]').val(data.id);
+    $('.js-delete-record-btn').attr("id",data.id);
+
+    $(UPDATE_FORM_IDENTIFIER + ' input[name="part"]').focus();
 }
 
-function displayDeleteRecord(data) {
-    resetScreens();
-    $(DELETE_CONFIRMATION_IDENTIFIER).append(
-        '<p>Part Name: ' + data.part + '</p>' +
-        '<p>Status: ' + data.status + '</p>' +
-        '<p>Repair: ' + data.needsRepair + '</p>' +
-        '<p>Last Maintenance: ' + data.lastMaintenance + '</p>' +
-        '<p>Freq: ' + data.frequency + '</p>' +
-        '<br><br><input class="js-delete-record-btn" id=' + data.id + ' type="button" value="Delete">'
-    );
+function createFiltersForm(data) {
+    $(FILTER_FORM_IDENTIFIER).append(`
+        <ul>
+        <h2>Filter Search</h2>
+        <li><label>Part name: </label><input type="text" name="part" placeholder="all parts"></li>
+        <li><label>Status: </label><input type="text" name="status" placeholder="any status"></li>
+        <li><label>Needs repair: </label><input type="radio" name="needsRepair" value=true>true <input type="radio" name="needsRepair" value=false>false<input type="radio" name="needsRepair" value="any" checked="checked">any</li>
+        <li><label>Begin date: </label><input type="date" name="beginDate" placeholder="begin date"></li>
+        <li><label>End date: </label><input type="date" name="endDate" placeholder="end date"></li>
+        <button type="button" class="searchButton">Search</button>
+        </ul>
+    `);
+    displayFilter(false, true);
 }
 
-function displayAddResults(data) {
-    resetScreens();
-    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
-        '<p>record added </p>'
-    );
+function displayAddResult(data) {
+    $('#addOverlay').css("display","none");
+    displayResult('Added new record successfully.');
+}
+
+function displayDeleteResult(data) {
+    $('#deleteOverlay').css("display","none");
+    displayResult('Deleted record successfully.');
+}
+
+function displayUpdateResult(data) {
+    $('#updateOverlay').css("display","none");
+    displayResult('Updated record successfully.');
+}
+
+function displayResult(resultString, data) {
+    $(RESULT_FROM_REQUEST_IDENTIFIER).text(resultString);
+
+    $('#resultOverlay').css("display","flex");
     getAndDisplayMaintenanceRecords();
 }
 
-function displayDeleteResults(data) {
-    resetScreens();
-    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
-        '<p>Deleted record </p>'
-    );
-    getAndDisplayMaintenanceRecords();
-}
+function displayResult(resultString, data) {
+    $('#updateOverlay').css("display","none");
+    $(RESULT_FROM_REQUEST_IDENTIFIER).text(resultString);
 
-function displayUpdateResults(data) {
-    resetScreens();
-    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
-        '<p>Updated record</p>'
-    );
+    $('#resultOverlay').css("display","flex");
     getAndDisplayMaintenanceRecords();
 }
 
@@ -159,59 +174,55 @@ function viewUpdateRecord(id) {
     getSingleMaintenanceRecords(id, displayUpdateRecord);
 }
 
-function viewDeleteRecord(id) {
-    getSingleMaintenanceRecords(id, displayDeleteRecord);
-}
-
 function getAndDisplayMaintenanceRecords() {
-	getMaintenanceRecords(displayMaintenanceRecords);
+
+    let data = $(FILTER_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+
+    let filter = {};
+    if(data.part != '') filter.part = data.part;
+    if(data.status != '') filter.status = data.status;
+    if(data.needsRepair != 'any') filter.needsRepair = (data.needsRepair=='true');
+
+    if (data.beginDate != '') {
+        filter.lastMaintenance = {};
+        filter.lastMaintenance.$gt =  data.beginDate;
+    }
+    if (data.endDate != '') {
+        filter.lastMaintenance = filter.lastMaintenance || {};
+        filter.lastMaintenance.$lt =  data.endDate;
+    }
+
+    let location = {
+        currentPage: $(".currentPage").text(),
+        pageQuantity: $(RECORDS_PER_PAGE_IDENTIFIER).find(":selected").attr("value")
+    };
+
+    let query = {
+        filter: filter, 
+        location: location,
+        sort: sortState
+    }
+
+	getMaintenanceRecords(query, displayMaintenanceRecords);
 }
 
 function addRecord(record){
-    addMaintenanceRecord(record, displayAddResults);
+    addMaintenanceRecord(record, displayAddResult);
 }
 
 function deleteRecord(id) {
-    deleteMaintenanceRecord(id, displayDeleteResults);
+    deleteMaintenanceRecord(id, displayDeleteResult);
 }
 
 function updateRecord(record) {
-    UpdateMaintenanceRecord(record, displayUpdateResults);
-}
-
-function filterByPart() {
-  // Declare variables 
-  var input, filter, table, tr, td, i;
-  input = document.getElementById('filterPart');
-  filter = input.value.toUpperCase();
-  table = document.getElementById('listTable');
-  tr = table.getElementsByTagName('tr');
-
-  // Loop through all table rows, and hide those who don't match the search query
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName('td')[0];
-    if (td) {
-      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = '';
-      } else {
-        tr[i].style.display = 'none';
-      }
-    } 
-  }
-}
-
-function resetScreens() {
-    $('#filterPart').hide();
-    $('#listTable').empty();
-    $(UPDATE_FORM_IDENTIFIER).empty();
-    $(ADD_FORM_IDENTIFIER).empty();
-    $(DELETE_CONFIRMATION_IDENTIFIER).empty();
+    UpdateMaintenanceRecord(record, displayUpdateResult);
 }
 
 function watchAddBtn() {
   $(ADD_FORM_IDENTIFIER).submit(function(event) {
     event.preventDefault();
-    var data = $(ADD_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    let data = $(ADD_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    if('needsRepair' in data) data.needsRepair = (data.needsRepair == 'true');
     addRecord(data);
   });
 }
@@ -219,22 +230,33 @@ function watchAddBtn() {
 function watchUpdateBtn() {
   $(UPDATE_FORM_IDENTIFIER).submit(function(event) {
     event.preventDefault();
-    var data = $(UPDATE_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    let data = $(UPDATE_FORM_IDENTIFIER).serializeArray().reduce(function(m,o){ m[o.name] = o.value; return m;}, {});
+    if('needsRepair' in data) data.needsRepair = (data.needsRepair == 'true');
     updateRecord(data);
   });
 }
 
 function watchDeleteBtn() {
-  $(DELETE_CONFIRMATION_IDENTIFIER).on('click', '.js-delete-record-btn', function(event) {
+  $(UPDATE_FORM_IDENTIFIER).on('click', '.js-delete-record-btn', function(event) {
     event.preventDefault();
-    deleteRecord(event.currentTarget.id);
+    if(confirm('Are you sure you want to delete this record?')) deleteRecord(event.currentTarget.id);
   });
 }
 
-function watchShowMaintenanceBtn() {
-  $(RESULTS_FROM_REQUEST_IDENTIFIER).on('click', '.js-show-maintenance-record-btn', function(event) {
+function watchCancelBtn() {
+  $(UPDATE_FORM_IDENTIFIER).on('click', '.js-cancel-btn', function(event) {
     event.preventDefault();
-    getAndDisplayMaintenanceRecords();
+    $('#updateOverlay').css("display","none");
+  });
+
+  $(ADD_FORM_IDENTIFIER).on('click', '.js-cancel-btn', function(event) {
+    event.preventDefault();
+    $('#addOverlay').css("display","none");
+  });
+
+  $(RESULT_POPUP_IDENTIFIER).on('click', '.js-cancel-btn', function(event) {
+    event.preventDefault();
+    $('#resultOverlay').css("display","none");
   });
 }
 
@@ -244,13 +266,93 @@ function watchAddMaintenanceBtn() {
     displayAddRecord();
   });
 }
+function watchNextPageBtn() {
+  $(NEXT_BUTTON_IDENTIFIER).click((event) => {
+    event.preventDefault();
+     $(PREV_BUTTON_IDENTIFIER).attr("disabled", false);
+    $(".currentPage").text(+$(".currentPage").text()+1);
+    getAndDisplayMaintenanceRecords();
+  });
+}
+function watchPrevPageBtn() {
+  $(PREV_BUTTON_IDENTIFIER).click((event) => {
+    event.preventDefault();
+    let newCurrentPage = +$(".currentPage").text()-1;
+    $(".currentPage").text(newCurrentPage);
+    if(newCurrentPage <= 0)  $(PREV_BUTTON_IDENTIFIER).attr("disabled", true);
+    getAndDisplayMaintenanceRecords();
+  });
+}
+
+function watchSearchBtn() {
+  $(FILTER_FORM_IDENTIFIER).on('click', SEARCH_BUTTON_IDENTIFIER, function(event) {
+    event.preventDefault();
+    getAndDisplayMaintenanceRecords();
+  });
+}
+
+function watchShowFiltersBtn() {
+  $(SHOW_FILTERS_BUTTON_IDENTIFIER).click((event) => {
+    event.preventDefault();
+    displayFilter($(FILTER_FORM_IDENTIFIER).css('display') == 'none');
+  });
+}
+
+function watchTableRow() {
+  $(RECORDS_TABLE_IDENTIFIER).on('click', "tbody tr", function(event) {
+    viewUpdateRecord($(event.currentTarget).data('id'));
+    event.preventDefault();
+    });
+}
+
+let sortState = {part: 1};
+function watchHeaders() {
+  $('th').click((event) => {
+    event.preventDefault();
+    let sortByField = $(event.currentTarget).data('sort');
+    
+    let sortDirection;
+    if(sortByField in sortState) {
+        sortDirection = sortState[sortByField] * -1; // toggle between 1 & -1 for sort order
+    }
+    else {
+        sortDirection = 1;
+    }
+
+    //clear old sort header's image, then update new sort header's image
+    $(`th[data-sort=${Object.keys(sortState)[0]}] img`).attr("src",""); 
+    $(`th[data-sort=${sortByField}] img`).attr("src", (sortDirection == 1) ? "sort-down.png" : "sort-up.png"); 
+
+    sortState = {};
+    sortState[sortByField] = sortDirection;
+    getAndDisplayMaintenanceRecords();
+  });
+}
+
+function watchRecordsPerPage() {
+  $(RECORDS_PER_PAGE_IDENTIFIER).change((event) => {
+    event.preventDefault();
+    $(".currentPage").text(0),
+    getAndDisplayMaintenanceRecords();
+  });
+}
 
 //  on page load do this
 $(function() {
     watchUpdateBtn();
     watchDeleteBtn();
+    watchCancelBtn();
     watchAddBtn();
-    watchShowMaintenanceBtn();
     watchAddMaintenanceBtn();
+    watchSearchBtn();
+    watchShowFiltersBtn();
+    watchHeaders();
+    createFiltersForm();
+    watchTableRow();
+    watchRecordsPerPage();
+    watchRecordsPerPage();
+    watchPrevPageBtn();
+    watchNextPageBtn();
+
     getAndDisplayMaintenanceRecords();
 });
