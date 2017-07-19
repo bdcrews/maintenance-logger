@@ -18,11 +18,13 @@ orange: #FFA800
 
 body {
     background-color: #687FA1;
+    min-width: 520px;
 }
 
 h1 {
   color: #202020;
   letter-spacing: -2px;
+  margin: 0;
 }
 
 h1 span {
@@ -33,6 +35,23 @@ h1 span {
   color: #f1ebe5;
   text-shadow: 5px 10px 10px rgba(0, 0, 0, .5),0 -2px 1px white;
   letter-spacing: -4px;
+}
+
+h2 {
+  color:  #FFFFFF;
+  background-color: #0D264A;
+  background: linear-gradient(to right, #0D264A,  #687FA1, #0D264A);
+  position: absolute;
+  left: 0;
+  top: 0;
+  height:56px;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+  color: #FFFFFF;
+  text-shadow: 2px 2px 4px #000000;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 #listTable tbody tr:hover{
@@ -60,36 +79,37 @@ h1 span {
 }
 
 .js-cancel-btn{
-    float: right;
+  float: right;
 }
 
 #listTable {
-    border-collapse: collapse; /* Collapse borders */
-    width: 100%; /* Full-width */
+    border-collapse: collapse;
+    width: 100%;
     background-color: #ffffff;
     border: 2px solid #0D264A;
 }
 
-#addForm, #updateForm {
+#addForm, #updateForm, #resultPopup {
     font-size: 18px; /* Increase font-size */
    -moz-border-radius: 8px;
    -webkit-border-radius: 8px;
     border-radius: 8px;
-    padding: 0px 20px 20px 20px;
+    padding: 65px 20px 20px 20px;
     background-color: #ffffff;
     border: 2px solid #0D264A;
     display: inline-block;
     line-height: 200%;
     box-shadow: 10px 10px 5px rgba(0, 0, 0, .5);
+    position: relative;
 }
 
-#addForm label, #updateForm label {
+#addForm label, #updateForm label, #filterForm label {
     display: inline-block;
     width: 170px;
 }
 
 
-#addOverlay, #updateOverlay  {
+#addOverlay, #updateOverlay, #resultOverlay  {
     position: fixed;
     display: none;
     justify-content: center;
@@ -104,6 +124,12 @@ h1 span {
     z-index: 2;
 }
 
+.resultFromRequest {
+  padding: 20px;
+  border: 1px solid #0D264A;
+  margin-bottom: 20px;
+}
+
 #listTable th {
     border: 2px solid #0D264A;
 }
@@ -115,7 +141,6 @@ h1 span {
 }
 
 #listTable th img {
-    /*float: right;*/
    -webkit-filter: invert(1);
    filter: invert(1);
    position: relative;
@@ -124,27 +149,26 @@ h1 span {
 }
 
 #listTable tr {
-    /* Add a bottom border to all table rows */
     border-bottom: 1px solid #0D264A; 
 }
 
-#filterForm label {
-    display: inline-block;
-    width: 120px;
-}
-
 #filterForm {
-    font-size: 18px;
-    position: relative;
-    border: 2px solid #0D264A;
-   -moz-border-radius: 8px 8px 0px 0px;
-   -webkit-border-radius: 8px 8px 0px 0px;
-    border-radius: 8px 8px 0px 0px;
-    background-color: #ffffff;
+  padding-top: 65px;
+  font-size: 18px;
+  position: relative;
+  border: 2px solid #0D264A;
+ -moz-border-radius: 8px 8px 0px 0px;
+ -webkit-border-radius: 8px 8px 0px 0px;
+  border-radius: 8px 8px 0px 0px;
+  background-color: #ffffff;
 }
 
 input {
     font-size: 18px;
+}
+
+input:read-only {
+  background-color: rgba(104, 127, 161, .3);
 }
 
 #filterForm li {
@@ -191,7 +215,7 @@ button:disabled {
 }
 
 #recordsPerPage {
-    padding: 15px 15px;
+    padding: 0px 0px;
    font-size: 18px;
    overflow:hidden;
    -moz-border-radius: 4px;
@@ -212,7 +236,7 @@ button:disabled {
     background-color: #0D264A;
 }
 
-input[name="currentPage"] {
+.currentPage {
     text-align: left;
     font-family : inherit;
     font-size: 1em;
@@ -220,14 +244,21 @@ input[name="currentPage"] {
     width: 55px;    
     border: 0;
     background-color: inherit;
+    color: black;
 }
 
 .nextButton {
     float: right;
+    background-image: url('/next.png');
+    background-size: 50px 40px;
+    background-repeat: no-repeat;
 }
 
 .prevButton {
     float: left;
+    background-image: url('/prev.png');
+    background-size: 50px 40px;
+    background-repeat: no-repeat;
 }
 nav {
     background-color: #FFFFFF;
@@ -238,6 +269,11 @@ nav {
     border-radius: 0px 0px 8px 8px;
     padding: 5px 10px 2px 10px;
     text-align: center;
+    height: 70px;
+}
+
+nav p {
+    margin: 5px;
 }
 
 .pageControl {
@@ -252,4 +288,9 @@ nav {
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
+}
+
+.topBar {
+  position: relative;
+  margin: 10px;
 }

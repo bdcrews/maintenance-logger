@@ -2,7 +2,8 @@
 
 const ADD_FORM_IDENTIFIER = '#addForm';
 const UPDATE_FORM_IDENTIFIER = '#updateForm';
-const RESULTS_FROM_REQUEST_IDENTIFIER = '.resultsFromRequest';
+const RESULT_POPUP_IDENTIFIER = '#resultPopup';
+const RESULT_FROM_REQUEST_IDENTIFIER = '.resultFromRequest';
 const ADD_BUTTON_IDENTIFIER = '.addButton';
 const NEXT_BUTTON_IDENTIFIER = '.nextButton';
 const PREV_BUTTON_IDENTIFIER = '.prevButton';
@@ -135,27 +136,33 @@ function createFiltersForm(data) {
     displayFilter(false, true);
 }
 
-function displayAddResults(data) {
+function displayAddResult(data) {
     $('#addOverlay').css("display","none");
-    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
-        '<p>record added </p>'
-    );
+    displayResult('Added new record successfully.');
+}
+
+function displayDeleteResult(data) {
+    $('#deleteOverlay').css("display","none");
+    displayResult('Deleted record successfully.');
+}
+
+function displayUpdateResult(data) {
+    $('#updateOverlay').css("display","none");
+    displayResult('Updated record successfully.');
+}
+
+function displayResult(resultString, data) {
+    $(RESULT_FROM_REQUEST_IDENTIFIER).text(resultString);
+
+    $('#resultOverlay').css("display","flex");
     getAndDisplayMaintenanceRecords();
 }
 
-function displayDeleteResults(data) {
+function displayResult(resultString, data) {
     $('#updateOverlay').css("display","none");
-    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
-        '<p>Deleted record </p>'
-    );
-    getAndDisplayMaintenanceRecords();
-}
+    $(RESULT_FROM_REQUEST_IDENTIFIER).text(resultString);
 
-function displayUpdateResults(data) {
-    $('#updateOverlay').css("display","none");
-    $(RESULTS_FROM_REQUEST_IDENTIFIER).empty().append(
-        '<p>Updated record</p>'
-    );
+    $('#resultOverlay').css("display","flex");
     getAndDisplayMaintenanceRecords();
 }
 
@@ -186,7 +193,7 @@ function getAndDisplayMaintenanceRecords() {
     }
 
     let location = {
-        currentPage: $("input[name=currentPage]").val(),
+        currentPage: $(".currentPage").text(),
         pageQuantity: $(RECORDS_PER_PAGE_IDENTIFIER).find(":selected").attr("value")
     };
 
@@ -200,15 +207,15 @@ function getAndDisplayMaintenanceRecords() {
 }
 
 function addRecord(record){
-    addMaintenanceRecord(record, displayAddResults);
+    addMaintenanceRecord(record, displayAddResult);
 }
 
 function deleteRecord(id) {
-    deleteMaintenanceRecord(id, displayDeleteResults);
+    deleteMaintenanceRecord(id, displayDeleteResult);
 }
 
 function updateRecord(record) {
-    UpdateMaintenanceRecord(record, displayUpdateResults);
+    UpdateMaintenanceRecord(record, displayUpdateResult);
 }
 
 function watchAddBtn() {
@@ -246,12 +253,16 @@ function watchCancelBtn() {
     event.preventDefault();
     $('#addOverlay').css("display","none");
   });
+
+  $(RESULT_POPUP_IDENTIFIER).on('click', '.js-cancel-btn', function(event) {
+    event.preventDefault();
+    $('#resultOverlay').css("display","none");
+  });
 }
 
 function watchAddMaintenanceBtn() {
   $(ADD_BUTTON_IDENTIFIER).click((event) => {
     event.preventDefault();
-    displayFilter(false, true);
     displayAddRecord();
   });
 }
@@ -259,15 +270,15 @@ function watchNextPageBtn() {
   $(NEXT_BUTTON_IDENTIFIER).click((event) => {
     event.preventDefault();
      $(PREV_BUTTON_IDENTIFIER).attr("disabled", false);
-    $("input[name=currentPage]").val(+$("input[name=currentPage]").val()+1);
+    $(".currentPage").text(+$(".currentPage").text()+1);
     getAndDisplayMaintenanceRecords();
   });
 }
 function watchPrevPageBtn() {
   $(PREV_BUTTON_IDENTIFIER).click((event) => {
     event.preventDefault();
-    let newCurrentPage = +$("input[name=currentPage]").val()-1;
-    $("input[name=currentPage]").val(newCurrentPage);
+    let newCurrentPage = +$(".currentPage").text()-1;
+    $(".currentPage").text(newCurrentPage);
     if(newCurrentPage <= 0)  $(PREV_BUTTON_IDENTIFIER).attr("disabled", true);
     getAndDisplayMaintenanceRecords();
   });
@@ -321,7 +332,7 @@ function watchHeaders() {
 function watchRecordsPerPage() {
   $(RECORDS_PER_PAGE_IDENTIFIER).change((event) => {
     event.preventDefault();
-    $("input[name=currentPage]").val(0),
+    $(".currentPage").text(0),
     getAndDisplayMaintenanceRecords();
   });
 }

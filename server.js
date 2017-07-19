@@ -12,15 +12,14 @@ const recordsRouter = require('./recordsRouter');
 
 const app = express();
 
-app.use(morgan('common'));
-app.use(bodyParser.json());
 app.use(favicon('./public/favicon.ico'));
+app.use(morgan('common'));
+app.use(express.static('public'));
 
 mongoose.Promise = global.Promise;
 
 app.use('/records', recordsRouter);
 
-app.use(express.static('public'));
 
 app.use('*', function(req, res, next) {
   return(

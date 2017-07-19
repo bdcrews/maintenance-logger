@@ -7,14 +7,14 @@
 <body>
 	<h1><span>Maintenance Logger<span></h1>
 
-	<div class="resultsFromRequest"></div>
-
-	<button type="button" class="showFiltersButton"></button>
-	<button type="button" class="addButton" style="background-image: url('/add-button.png')"></button><br><br>
+	<div class="topBar">
+		<button type="button" class="showFiltersButton" alt="Show search filters"></button>
+		<button type="button" class="addButton" style="background-image: url('/add-button.png')" alt="Add New Record"></button>
+	</div>
 
 	<form id="filterForm"></form>
 
-	<section class="searchResults">
+	<section class="searchResult">
 		<table id="listTable">
 			<thead><tr class="noselect">
 	            <th  style="width:30%;" data-sort="part">Part Name <img src="sort-down.png"></th>
@@ -28,19 +28,20 @@
 			</tfoot>
 		</table>
 		<nav>
-			<button type="button" class="prevButton" disabled>Prev</button>
-			<div class="pageControl">
-				Page: 
-				<input type="number" name="currentPage" value="0" readonly>
+			<button type="button" class="prevButton" alt="Previous Page" disabled></button>
+			<button type="button" class="nextButton" alt="Next Page" ></button>
+			<p>Page <span class="currentPage">0</span></p>
+			<div class="pageControl"> 
 				<select id="recordsPerPage">
-					<option value=10> 10 per page</option selected>
-					<option value=20> 20 per page</option>
-					<option value=40> 40 per page</option>
-					<option value=100> 100 per page</option>
+					<option value=10> 10</option selected>
+					<option value=20> 20</option>
+					<option value=40> 40</option>
+					<option value=100>100</option>
 					<option value="all"> all</option>
 				</select>
+				<label>per page</label>
 			</div>
-			<button type="button" class="nextButton">Next</button>
+
 		</nav>
 	</section>
 
@@ -61,7 +62,7 @@
             <input type="number" name="frequency" required> <br> 
             <label>id:</label> 
             <input type="text" name="id" readonly> <br> 
-            <br><br>
+            <br>
             <input type="submit" class="button" value="Update">
             <input class="js-delete-record-btn button" type="button" value="Delete">
             <input class="js-cancel-btn button" type="button" value="Cancel">
@@ -82,13 +83,19 @@
 	        <input type="date" name="lastMaintenance" required> <br>
 	        <label>Freq (days):</label>
 	        <input type="number" name="frequency" value="0" required> <br> 
-	        <br><br>
+	        <br>
 	        <input type="submit" class="button" value="Add">
 	        <input class="js-cancel-btn button" type="button" value="Cancel">
 		</form>
 	</div>
 
-	<div class="deleteConfirmation"></div>            
+	<div id="resultOverlay">
+		<div id="resultPopup">
+			<h2>Result</h2>
+			<div class="resultFromRequest"></div>
+	        <input class="js-cancel-btn button" type="button" value="Close">
+		</div>
+	</div>            
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 	<script type="text/javascript" src="app.js"></script>
