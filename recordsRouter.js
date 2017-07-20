@@ -10,7 +10,7 @@ const requiredFields = (fields) => {
   return (req, res, next) => {
     if (fields.every((field) => field in req.body)) {
       next();
-    } 
+    }
     else {
       const missing = fields
         .filter((field) => !(req in body))
@@ -47,7 +47,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/',
-  jsonParser,  
+  jsonParser,
   requiredFields(['part', 'status', 'lastMaintenance', 'frequency']),
   (req, res) => {
     MaintenanceRecord.create({
@@ -75,8 +75,8 @@ router.delete('/:id', (req, res) => {
     });
 });
 
-router.put('/:id', 
-  jsonParser,  
+router.put('/:id',
+  jsonParser,
   (req, res) => {
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     res.status(400).json({

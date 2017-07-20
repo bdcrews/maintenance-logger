@@ -2,7 +2,8 @@
 <html>
 <head>
 	<title>Maintenance Logger</title>
-    <link href="index.css" rel="stylesheet" type="text/css" />
+	<link href="index.css" rel="stylesheet" type="text/css" />
+	<meta name="viewport" content="width=device-width">
 </head>
 <body>
 	<h1><span>Maintenance Logger<span></h1>
@@ -17,21 +18,21 @@
 	<section class="searchResult">
 		<table id="listTable">
 			<thead><tr class="noselect">
-	            <th  style="width:30%;" data-sort="part">Part Name <img src="sort-down.png"></th>
-	            <th style="width:10%;" data-sort="status">Status <img src=""></th>
-	            <th style="width:10%;" data-sort="needsRepair">Repair <img src=""></th>
-	            <th style="width:40%;" data-sort="lastMaintenance">Last Maintenance <img src=""></th>
-	            <th style="width:10%;" data-sort="frequency">Freq. <img src=""></th>
-	        </tr></thead>
-	        <tbody></tbody>
-	        <tfoot>
+				<th  style="width:30%;" data-sort="part">Part Name <img src="sort-down.png"></th>
+				<th style="width:10%;" data-sort="status">Status <img src=""></th>
+				<th style="width:10%;" data-sort="needsRepair">Repair <img src=""></th>
+				<th style="width:40%;" data-sort="lastMaintenance">Last Maintenance <img src=""></th>
+				<th style="width:10%;" data-sort="frequency">Freq. <img src=""></th>
+			</tr></thead>
+			<tbody></tbody>
+			<tfoot>
 			</tfoot>
 		</table>
 		<nav>
 			<button type="button" class="prevButton" alt="Previous Page" disabled></button>
 			<button type="button" class="nextButton" alt="Next Page" ></button>
 			<p>Page <span class="currentPage">0</span></p>
-			<div class="pageControl"> 
+			<div class="pageControl">
 				<select id="recordsPerPage">
 					<option value=10> 10</option selected>
 					<option value=20> 20</option>
@@ -49,23 +50,23 @@
 	<div id="updateOverlay">
 		<form id="updateForm">
 			<h2>Update record</h2>
-		    <label>Part Name:</label> 
-        	<input type="text" name="part" required auto> <br>
-            <label>Status:</label> 
-            <input type="text" name="status" required> <br>
-            <label>Repair:</label> 
-            <input type="radio" name="needsRepair" value=true> true 
-            <input type="radio" name="needsRepair" value=false> false <br>
-            <label>Last Maintenance:</label> 
-            <input type="date" name="lastMaintenance" required> <br>
-            <label>Frequency:</label> 
-            <input type="number" name="frequency" required> <br> 
-            <label>id:</label> 
-            <input type="text" name="id" readonly> <br> 
-            <br>
-            <input type="submit" class="button" value="Update">
-            <input class="js-delete-record-btn button" type="button" value="Delete">
-            <input class="js-cancel-btn button" type="button" value="Cancel">
+			<label>Part Name:</label>
+			<input type="text" name="part" required auto> <br>
+			<label>Status:</label>
+			<input type="text" name="status" required> <br>
+			<label>Repair:</label>
+			<input type="radio" name="needsRepair" value=true> true
+			<input type="radio" name="needsRepair" value=false> false <br>
+			<label>Last Maintenance:</label>
+			<input type="date" name="lastMaintenance" required> <br>
+			<label>Frequency:</label>
+			<input type="number" name="frequency" required> <br>
+			<label>id:</label>
+			<input type="text" name="id" readonly> <br>
+			<br>
+			<input type="submit" class="button" value="Update">
+			<input class="js-delete-record-btn button" type="button" value="Delete">
+			<input class="js-cancel-btn button" type="button" value="Cancel">
 		</form>
 	</div>
 
@@ -73,19 +74,19 @@
 		<form id="addForm">
 			<h2>Add new record</h2>
 			<label>Part Name:</label>
-        	<input type="text" name="part" placeholder="part name" required> <br>
-        	<label>Status:</label>
-        	<input type="text" name="status" placeholder="current status" required> <br>
-		    <label>Needs repair?:</label>
-	        <input type="radio" name="needsRepair" value=true> true 
-	        <input type="radio" name="needsRepair" value=false checked> false <br>
-	        <label>Last Maintenance:</label>
-	        <input type="date" name="lastMaintenance" required> <br>
-	        <label>Freq (days):</label>
-	        <input type="number" name="frequency" value="0" required> <br> 
-	        <br>
-	        <input type="submit" class="button" value="Add">
-	        <input class="js-cancel-btn button" type="button" value="Cancel">
+			<input type="text" name="part" placeholder="part name" required> <br>
+			<label>Status:</label>
+			<input type="text" name="status" placeholder="current status" required> <br>
+			<label>Needs repair?:</label>
+			<input type="radio" name="needsRepair" value=true> true
+			<input type="radio" name="needsRepair" value=false checked> false <br>
+			<label>Last Maintenance:</label>
+			<input type="date" name="lastMaintenance" required> <br>
+			<label>Freq (days):</label>
+			<input type="number" name="frequency" value="0" required> <br>
+			<br>
+			<input type="submit" class="button" value="Add">
+			<input class="js-cancel-btn button" type="button" value="Cancel">
 		</form>
 	</div>
 
@@ -93,10 +94,10 @@
 		<div id="resultPopup">
 			<h2>Result</h2>
 			<div class="resultFromRequest"></div>
-	        <input class="js-cancel-btn button" type="button" value="Close">
+			<input class="js-cancel-btn button" type="button" value="Close">
 		</div>
-	</div>            
-	
+	</div>
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 	<script type="text/javascript" src="app.js"></script>
 </body>

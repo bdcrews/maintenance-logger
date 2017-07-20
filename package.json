@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "test": "mocha"
+    "test": "mocha",
+    "mongodb": "mongod --dbpath=mongo_data/ --nojournal"
   },
   "dependencies": {
     "body-parser": "^1.17.2",
