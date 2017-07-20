@@ -19,7 +19,7 @@ Maintenance Logger allows the user to input, retrieve, modify and delete mainten
 1. Download or clone the repository.
 2. Install [node](http://nodejs.org/).
 3. Install [mongo](http://www.mongodb.com/).
-4. run 'npm install' 
-5. 'npm run mongodb' to start Mongo database
-6. 'npm start' to start the app
+4. run `npm install` 
+5. `npm run mongodb` to start Mongo database
+6. `npm start` to start the app
 7. The website should be available at the following address: http://127.0.0.1:8080/
