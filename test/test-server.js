@@ -26,7 +26,6 @@ function tearDownDb() {
   });
 }
 
-
 // used to put randomish documents in db
 // so we have data to work with and assert about.
 // we use the Faker library to automatically
@@ -93,10 +92,11 @@ describe('maintenance log API resource', function() {
       //    3. prove the number of records we got back is equal to number
       //       in db.
       let res;
-      let query = {};
-      query.query = {};
-      query.location = {pageQuantity: 20};
-      query.sort = {};
+      let query = {
+        query: {},
+        location: {pageQuantity: 20},
+        sort: {}
+      };
 
       return chai.request(app)
         .get('/records')
